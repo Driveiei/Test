@@ -1,38 +1,30 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package Skerby;
 
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+
 import javax.swing.ImageIcon;
 
-/**
- *
- * @author WIN10PRO
- */
-public class Player{
- 
-    private Image playerR = new ImageIcon("Images\\Player\\playerR.png").getImage();
-    private Image playerJump = new ImageIcon("Images\\Player\\playerJump.png").getImage();
-    private Image playerAtk = new ImageIcon("Images\\Player\\playerAtk.png").getImage();
-//    private Image playerAtk2 = new ImageIcon("Images\\Player\\playerAtk2.png").getImage();
+public class Player {
+	
+	private Image playerR = new ImageIcon("Images/Player/playerR.png").getImage();
+    private Image playerJump = new ImageIcon("Images/Player/playerJump.png").getImage();
+    private Image playerAtk = new ImageIcon("Images/Player/playerAtk.png").getImage();
+//    private Image playerAtk2 = new ImageIcon("Images/Player/playerAtk2.png").getImage();
     
     private boolean attack;
-    
     private boolean right;
     private boolean left;
-    private boolean jumping;
-    private boolean falling ;
-    private double jumpSpeed = 5;
+    
+    private boolean jumping = true;
+    private double jumpSpeed = 6;
     private double currentJumpSpeed = jumpSpeed;
-    private double maxFallSpeed = 5;
+    
+    private boolean falling = true;
+    private double maxFallSpeed = 6;
     private double currentFallSpeed = 0.1;
    
     private double x;
@@ -41,28 +33,27 @@ public class Player{
     
     private int score = 0;
     
-    static ArrayList<Coins> cl = CoinsManeger.getCoinsBounds();
-    static ArrayList<Enemy> el = EnemyManeger.getEnemyListBounds();
-  //add
+    static ArrayList<Coins> cl = CoinsManager.getCoinsBounds();
+    static ArrayList<Enemy> el = EnemyManager.getEnemyListBounds();
+    //new
     static ArrayList<Block> bl = BlockManager.getBlocksBounds();
-    //add
     private final int playerWidth = 64;
     private final int playerHeight = 64;
+
+    private int count = 0;
     
     public Player(){
         x = 140;
-        y = 360;
+        y = 200;
         playerHP = 100;
     }
     
     public void update(){
-        colisionBlocks();
-
         if (right){
-            x += 5;
+            x += 4;
         }
         if (left) {
-            x -= 5;
+            x -= 4;
         }
         if (jumping){
             y -= currentJumpSpeed;
@@ -76,39 +67,39 @@ public class Player{
         if (falling){
             y += currentFallSpeed;
             if (currentFallSpeed < maxFallSpeed){
-                currentFallSpeed += 0.1;
+                currentFallSpeed += 0.15;
             }
         }
         if (!falling) {
             currentFallSpeed = 0.1;
         }
-        // can change?
         if (x < 140) x = 140;
         if (x > 5900) x = 5900;
-        //change
+        //new
         if (y > 450) playerHP = 0;
+//        if (y > 360) y = 360;
         if (y < 0) y = 0;
         colisionCoins();
         colisionEnemy();
-    //    System.out.println(x);
-      //add
-        
+        //new
+        colisionBlocks();
     }
     
     public void render(Graphics2D g2d){
         if (jumping == true) {
             g2d.drawImage(playerJump, (int)x, (int)y, null);
         }else if (attack == true){
-            g2d.drawImage(playerAtk, (int)x, (int)y, null);
+        	g2d.drawImage(playerAtk, (int)x, (int)y, null);
         }else {
             g2d.drawImage(playerR, (int)x, (int)y, null);
         }
-        //add for test
-//        Graphics2D g3d = (Graphics2D) g2d;
-//        g3d.draw(getBoundsDown());
-//        g3d.draw(getBoundsRight());
-//        g3d.draw(getBoundsLeft());
-//        g3d.draw(getBoundsTop());
+      //add for test
+      Graphics2D g3d = (Graphics2D) g2d;
+      g3d.draw(getBoundsDown());
+      g3d.draw(getBoundsRight());
+      g3d.draw(getBoundsLeft());
+      g3d.draw(getBoundsTop());
+
     }
     
     public int getX(){
@@ -123,6 +114,15 @@ public class Player{
         return playerHP;
     }
     
+    public boolean doubleJump(){
+    	if(count <= 1 ){
+    		falling = false;
+    		return true;
+    	}else{
+    		return false;
+    	}
+    }
+    
     public void keyPressed(KeyEvent k){
         int key = k.getKeyCode();
         if (key == KeyEvent.VK_LEFT){
@@ -131,7 +131,8 @@ public class Player{
         if (key == KeyEvent.VK_RIGHT){
             right = true;
         }
-        if (key == KeyEvent.VK_SPACE || key == KeyEvent.VK_UP){
+        if ((key == KeyEvent.VK_SPACE || key == KeyEvent.VK_UP) && (canJump() || doubleJump()) ){
+        	count++;
             jumping = true;
         }
         if (key == KeyEvent.VK_Z){
@@ -148,31 +149,46 @@ public class Player{
             right = false;
         }
         if (key == KeyEvent.VK_SPACE || key == KeyEvent.VK_UP){
-            falling = false;
+
         }
         if (key == KeyEvent.VK_Z){
             attack = false;
         }
     }
     
-//    public Rectangle getPlayerBounds(){
-//        return new Rectangle((int)x, (int)y, 64, 64);
-//    }
-    //add
-    public Rectangle getBoundsDown(){
-   	 return new Rectangle((int)x+4,(int)y+playerHeight,(int)playerWidth-15,(int)5);
-    }
-    public Rectangle getBoundsTop(){
-   	 return new Rectangle((int)x+4,(int)y+(playerHeight/5),(int)playerWidth-15,(int)5);
-    }
-    public Rectangle getBoundsRight(){
-   	 return new Rectangle((int)x+playerWidth-8,(int)y+(playerHeight/4),(int)5,(int)playerHeight-25);
-    }
-    public Rectangle getBoundsLeft(){
-   	 return new Rectangle((int)x,(int)y+(playerHeight/4),(int)5,(int)playerHeight-25);
+    public boolean canJump(){
+    	for(int i = 0; i<bl.size();i++){
+    		if(getBoundsDown().intersects(bl.get(i).getBlockBounds())){
+    			count = 0;
+    			return true;
+    		}
+    	}
+    	return false;
     }
     
-    //add
+    /*
+    public Rectangle getPlayerBounds(){
+        return new Rectangle((int)x, (int)y, 64, 64);
+    } */
+    
+    //new
+    public Rectangle getBoundsDown(){
+    	return new Rectangle((int)x+5,(int)y+playerHeight,(int)playerWidth-16,(int)5);
+    }
+    
+    public Rectangle getBoundsTop(){
+    	return new Rectangle((int)x+11,(int)y+(playerHeight/5),(int)playerWidth-25,(int)5);
+    }
+    
+    public Rectangle getBoundsRight(){
+      	return new Rectangle((int)x+playerWidth-8,(int)y+(playerHeight/4),(int)5,(int)playerHeight-25);
+    }
+    
+    public Rectangle getBoundsLeft(){
+    	return new Rectangle((int)x-5,(int)y+(playerHeight/4),(int)5,(int)playerHeight-25);
+    }
+    
+  //new
     public boolean coinOrNot(int i){
     	if(getBoundsDown().intersects(cl.get(i).getCoinsBounds())){
     		return true;
@@ -186,17 +202,20 @@ public class Player{
     		return false;
     	}
     }
+
     
     public void colisionCoins(){
         for (int i = 0; i < cl.size(); i++){
-            if (coinOrNot(i)){
-                cl.remove(i);
-                score++;
+ //           if (getPlayerBounds().intersects(cl.get(i).getCoinsBounds())){
+        	//new
+        	if (coinOrNot(i)){
+        		cl.remove(i);
+                score += 10;
             }
         }
     }
     
-    //add
+  //new
     public boolean enemyOrNot(int i){
     	if(getBoundsDown().intersects(el.get(i).getEnemyBounds())){
     		return true;
@@ -213,8 +232,10 @@ public class Player{
     
     public void colisionEnemy(){
         for (int i = 0; i < el.size(); i++){
-            if  (enemyOrNot(i)){
-                if (attack){
+//            if  (getPlayerBounds().intersects(el.get(i).getEnemyBounds())){
+            //new
+        	if (enemyOrNot(i)){	
+            	if (attack){
                     el.remove(i);
                 }else {
                     playerHP -= 1;
@@ -223,17 +244,21 @@ public class Player{
         }
     }
     
-    //add
+  //new
     public void colisionBlocks(){
         for (int i = 0; i < bl.size(); i++){
             if (getBoundsDown().intersects(bl.get(i).getBlockBounds())){
                 currentFallSpeed = 0;
             	//y -= currentJumpSpeed;
-            } 
+            }
         }
         for (int i = 0; i < bl.size(); i++){
             if (getBoundsTop().intersects(bl.get(i).getBlockBounds())){
-            	y += currentJumpSpeed;
+            	
+            	y+=15;
+            	//y += currentJumpSpeed;
+            	//y += currentFallSpeed;
+            	
             } 
         }
         for (int i = 0; i < bl.size(); i++){
@@ -247,5 +272,5 @@ public class Player{
             } 
         }
     }
-    
+
 }

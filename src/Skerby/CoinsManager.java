@@ -1,23 +1,14 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package Skerby;
 
 import java.awt.Graphics2D;
 import java.util.ArrayList;
 
-/**
- *
- * @author WIN10PRO
- */
-public class CoinsManeger {
-    
-    static ArrayList<Coins> coinsList = new ArrayList<>();
+public class CoinsManager {
+	
+	static ArrayList<Coins> coinsList = new ArrayList<>();
     private Coins coins;
     
-    public CoinsManeger(){
+    public CoinsManager(){
         for (int i = 0; i < 600; i+=70){
             addCoin(new Coins(300 + i, 390));
         }
@@ -41,5 +32,5 @@ public class CoinsManeger {
     public static ArrayList<Coins> getCoinsBounds(){
         return coinsList;
     }
-    
+
 }

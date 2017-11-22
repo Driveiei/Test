@@ -1,26 +1,32 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package Skerby;
 
 import java.awt.Graphics2D;
 import java.util.ArrayList;
 
-/**
- *
- * @author WIN10PRO
- */
-public class EnemyManeger {
-    
-    private Enemy enemy;
-    
-    static ArrayList<Enemy> enemyList = new ArrayList<>();
-    
-    public EnemyManeger(){
-        addEnemy(new Enemy(1200, 140));
+public class EnemyManager {
+	
+	static ArrayList<Enemy> enemyList = new ArrayList<>();
+	
+	private Enemy enemy;
+	
+	static ArrayList<Double> enemyX = new ArrayList<>();
+	static ArrayList<Double> enemyY = new ArrayList<>();
+	
+	public EnemyManager(){
+		enemyX.add(1200.0);
+		enemyY.add(360.0);
+		enemyX.add(2000.0);
+		enemyY.add(360.0);
+		init();
+//       addEnemy(new Enemy(1200, 360));
+//       addEnemy(new Enemy(2000, 360));
     }
+	
+	public void init(){
+		for (int i = 0; i < enemyX.size(); i++){
+			addEnemy(new Enemy(enemyX.get(i), enemyY.get(i)));
+		}
+	}
     
     public void render(Graphics2D g2d){
         for(int i = 0; i < enemyList.size(); i++){
@@ -47,5 +53,5 @@ public class EnemyManeger {
     public static ArrayList<Enemy> getEnemyListBounds(){
         return enemyList;
     }
-     
+
 }
